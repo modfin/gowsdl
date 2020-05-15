@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -149,11 +150,12 @@ type basicAuth struct {
 }
 
 type options struct {
-	tlsCfg      *tls.Config
-	auth        *basicAuth
-	timeout     time.Duration
-	transport   *http.Transport
-	httpHeaders map[string]string
+	tlsCfg       *tls.Config
+	auth         *basicAuth
+	timeout      time.Duration
+	transport    *http.Transport
+	httpHeaders  map[string]string
+	debugLogging bool
 }
 
 var defaultOptions = options{
@@ -188,6 +190,13 @@ func WithTimeout(t time.Duration) Option {
 func WithTransport(t *http.Transport) Option {
 	return func(o *options) {
 		o.transport = t
+	}
+}
+
+// WithDebugLogging is an Option to enable debug logging
+func WithDebugLogging() Option {
+	return func(o *options) {
+		o.debugLogging = true
 	}
 }
 
@@ -289,6 +298,11 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 	respEnvelope.Body = SOAPBody{Content: response}
 	err = xml.Unmarshal(rawbody, respEnvelope)
 	if err != nil {
+		if s.opts.debugLogging {
+			fmt.Println("got response, but err unmarshaling body: ", err)
+			fmt.Println("rawbody content:")
+			fmt.Println(string(rawbody))
+		}
 		return err
 	}
 
