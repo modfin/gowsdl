@@ -12,7 +12,7 @@ package {{.}}
 import (
 	"encoding/xml"
 	"time"
-	"github.com/hooklift/gowsdl/soap"
+	"github.com/modfin/gowsdl/soap"
 
 	{{/*range .Imports*/}}
 		{{/*.*/}}
